@@ -1,71 +1,189 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>ShopTest – Paiement Démo</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 20px;
-    }
-    .container {
-        max-width: 400px;
-        margin: auto;
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-        text-align: center;
-    }
-    button {
-        width: 100%;
-        padding: 15px;
-        font-size: 18px;
-        background: #4CAF50;
-        color: white;
-        border: none;
-        cursor: pointer;
-        border-radius: 8px;
-    }
-    button:disabled {
-        background: #aaa;
-        cursor: not-allowed;
-    }
-    .error {
-        margin-top: 15px;
-        padding: 12px;
-        background: #ffdddd;
-        border-left: 4px solid #ff4444;
-        display: none;
-    }
-</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Temu‑Demo — Panier</title>
+    <style>
+        :root{--accent:#ff3b30;--muted:#888}
+        body{font-family:Inter,Arial,Helvetica,sans-serif;background:#f7f7fb;margin:0;padding:24px}
+        .app{max-width:980px;margin:0 auto;display:flex;gap:24px}
+        .catalog{flex:2;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+        .card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+        .card img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+        .card h3{margin:8px 0 6px;font-size:15px}
+        .price{font-weight:700;color:#111}
+        .muted{color:var(--muted);font-size:13px}
+        .aside{width:320px}
+        .panel{background:#fff;padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+        .cart-list{margin:12px 0;display:flex;flex-direction:column;gap:8px}
+        .cart-item{display:flex;gap:8px;align-items:center}
+        .cart-item img{width:56px;height:56px;object-fit:cover;border-radius:8px}
+        button{background:var(--accent);color:#fff;border:none;padding:10px 12px;border-radius:8px;cursor:pointer}
+        button:disabled{opacity:.6;cursor:not-allowed}
+        .error{margin-top:12px;padding:12px;background:#fff0f0;border:1px solid #ffb6b6;border-radius:8px;color:#a00;display:none}
+        header{max-width:980px;margin:0 auto;padding-bottom:12px}
+        h1{font-size:20px;margin:0 0 12px}
+    </style>
 </head>
 <body>
-<div class="container">
-    <h2>Paiement – Démonstration</h2>
+    <header style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div>
+            <h1 style="margin:0">Shop — Boutique</h1>
+            <div class="muted">Large choix, petits prix</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+            <input id="search" placeholder="Rechercher des produits" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;width:320px">
+            <select id="sort" style="padding:8px;border-radius:8px;border:1px solid #ddd">
+                <option value="default">Trier</option>
+                <option value="price-asc">Prix croissant</option>
+                <option value="price-desc">Prix décroissant</option>
+                <option value="title">Nom</option>
+            </select>
+        </div>
+    </header>
 
-    <p>Montant : <strong>49,90€</strong></p>
+    <main class="app">
+        <section style="flex:2">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <div class="muted">Affichage des produits</div>
+                <div class="muted" id="count"></div>
+            </div>
+            <div class="catalog" id="catalog">
+                <!-- produits injectés par JS -->
+            </div>
+        </section>
 
-    <button id="payerBtn">Payer maintenant</button>
+        <aside class="aside">
+            <div class="panel">
+                <h2>Panier</h2>
+                <div id="cart" class="cart-list">
+                    <div class="muted">Votre panier est vide</div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+                    <div style="flex:1">
+                        <div class="muted">Total</div>
+                        <div id="total" style="font-weight:700">0,00€</div>
+                    </div>
+                    <div style="width:140px">
+                        <button id="checkoutBtn">Payer</button>
+                    </div>
+                </div>
 
-    <div class="error" id="errorBox">
-        ❌ Erreur critique : impossible de valider le paiement.<br>
-        (Bug volontaire pour démonstration)
-    </div>
-</div>
+                <div id="errorBox" class="error"></div>
+            </div>
+        </aside>
+    </main>
 
-<script>
-document.getElementById("payerBtn").addEventListener("click", function() {
-    // Bug volontaire : le paiement échoue systématiquement
-    document.getElementById("errorBox").style.display = "block";
+    <script>
+        const products = [
+            {id:1,title:"Chaussures confort",price:29.90,img:"https://picsum.photos/seed/p1/400/300",desc:"Semelle amortissante, parfaites pour la marche."},
+            {id:2,title:"Veste légère",price:49.90,img:"https://picsum.photos/seed/p2/400/300",desc:"Coupe moderne, résistante à l'eau légère."},
+            {id:3,title:"Sac à dos urbain",price:19.90,img:"https://picsum.photos/seed/p3/400/300",desc:"Compartiment PC 15'', plusieurs poches."},
+            {id:4,title:"Casquette cool",price:9.90,img:"https://picsum.photos/seed/p4/400/300",desc:"Style streetwear, plusieurs couleurs."},
+            {id:5,title:"Montre sport",price:39.90,img:"https://picsum.photos/seed/p5/400/300",desc:"Étanche, suivi d'activité intégré."},
+            {id:6,title:"Écouteurs sans fil",price:24.90,img:"https://picsum.photos/seed/p6/400/300",desc:"Réduction active du bruit, autonomie 20h."},
+            {id:7,title:"Lampe LED",price:12.90,img:"https://picsum.photos/seed/p7/400/300",desc:"Éclairage chaud, intensité réglable."},
+            {id:8,title:"Tapis de yoga",price:14.90,img:"https://picsum.photos/seed/p8/400/300",desc:"Antidérapant et confortable."},
+            {id:9,title:"Chargeur rapide",price:11.90,img:"https://picsum.photos/seed/p9/400/300",desc:"USB-C 65W, compact."},
+            {id:10,title:"Lunettes soleil",price:17.90,img:"https://picsum.photos/seed/p10/400/300",desc:"Protection UV400, monture légère."},
+            {id:11,title:"Pull oversize",price:22.90,img:"https://picsum.photos/seed/p11/400/300",desc:"Tricot doux, disponible en plusieurs tailles."},
+            {id:12,title:"Coque téléphone",price:6.90,img:"https://picsum.photos/seed/p12/400/300",desc:"Protection renforcée, finitions mattes."},
+            {id:13,title:"Haut sport",price:13.90,img:"https://picsum.photos/seed/p13/400/300",desc:"Respirant et léger."},
+            {id:14,title:"Short running",price:15.90,img:"https://picsum.photos/seed/p14/400/300",desc:"Tissu séchant rapide."},
+            {id:15,title:"Batterie externe",price:21.90,img:"https://picsum.photos/seed/p15/400/300",desc:"10 000mAh, compact."},
+            {id:16,title:"Coussin voyage",price:8.90,img:"https://picsum.photos/seed/p16/400/300",desc:"Confort et maintien."},
+            {id:17,title:"Gourde inox",price:12.50,img:"https://picsum.photos/seed/p17/400/300",desc:"Garde les boissons chaudes/froides."},
+            {id:18,title:"Écharpe douce",price:9.50,img:"https://picsum.photos/seed/p18/400/300",desc:"Laine mélangée, chaude."},
+            {id:19,title:"Peluche enfant",price:7.90,img:"https://picsum.photos/seed/p19/400/300",desc:"Douce et hypoallergénique."},
+            {id:20,title:"Support téléphone",price:5.90,img:"https://picsum.photos/seed/p20/400/300",desc:"Repliable, multi-angle."},
+            {id:21,title:"Haut à manches longues",price:16.90,img:"https://picsum.photos/seed/p21/400/300",desc:"Coupe régulière, confortable."},
+            {id:22,title:"Jeans stretch",price:34.90,img:"https://picsum.photos/seed/p22/400/300",desc:"Extensible et résistant."},
+            {id:23,title:"Chaussettes pack 5",price:6.50,img:"https://picsum.photos/seed/p23/400/300",desc:"Coton, confort quotidien."},
+            {id:24,title:"Bande LED ambiante",price:18.90,img:"https://picsum.photos/seed/p24/400/300",desc:"Couleurs réglables et télécommande."}
+        ];
 
-    // Le bouton se désactive comme si le système plantait
-    this.disabled = true;
-});
-</script>
+        const catalog = document.getElementById('catalog');
+        const cartEl = document.getElementById('cart');
+        const totalEl = document.getElementById('total');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const errorBox = document.getElementById('errorBox');
+
+        const cart = {};
+
+        function openProduct(id){
+            const p = products.find(x=>x.id==id);
+            const modal = document.createElement('div');
+            modal.style.position='fixed';modal.style.left=0;modal.style.top=0;modal.style.right=0;modal.style.bottom=0;modal.style.background='rgba(0,0,0,0.4)';modal.style.display='flex';modal.style.alignItems='center';modal.style.justifyContent='center';
+            modal.innerHTML = `<div style="width:680px;background:#fff;border-radius:12px;padding:16px"><div style='display:flex;gap:12px'><img src="${p.img}" style='width:260px;height:180px;object-fit:cover;border-radius:8px'><div style='flex:1'><h2 style='margin:0'>${p.title}</h2><div class='muted'>${p.desc}</div><div style='margin-top:12px;font-weight:700'>${p.price.toFixed(2)}€</div><div style='margin-top:12px;display:flex;gap:8px'><button id='modalAdd'>Ajouter au panier</button><button id='modalClose' style='background:#ddd;color:#111'>Fermer</button></div></div></div></div>`;
+            document.body.appendChild(modal);
+            modal.querySelector('#modalClose').addEventListener('click',()=>modal.remove());
+            modal.querySelector('#modalAdd').addEventListener('click',()=>{cart[id]=(cart[id]||0)+1;renderCart();modal.remove()});
+        }
+
+        function renderCatalog(){
+            catalog.innerHTML = '';
+            let visible = products.slice();
+            // search
+            const q = (document.getElementById('search').value||'').toLowerCase().trim();
+            if(q) visible = visible.filter(p=> (p.title+' '+p.desc).toLowerCase().includes(q));
+            // sort
+            const s = document.getElementById('sort').value;
+            if(s==='price-asc') visible.sort((a,b)=>a.price-b.price);
+            if(s==='price-desc') visible.sort((a,b)=>b.price-a.price);
+            if(s==='title') visible.sort((a,b)=>a.title.localeCompare(b.title));
+
+            document.getElementById('count').textContent = visible.length+' produits';
+            visible.forEach(p=>{
+                const card = document.createElement('div'); card.className='card';
+                card.innerHTML = `
+                    <img src="${p.img}" alt="${p.title}">
+                    <h3>${p.title}</h3>
+                    <div class="price">${p.price.toFixed(2)}€</div>
+                    <div class="muted">Livraison gratuite</div>
+                    <div style="margin-top:8px;display:flex;gap:8px"><button data-id="${p.id}" class='addBtn'>Ajouter</button><button data-id="${p.id}" class='viewBtn' style='background:#fff;color:#111;border:1px solid #ddd'>Voir</button></div>`;
+                catalog.appendChild(card);
+            });
+            catalog.querySelectorAll('button.addBtn').forEach(b=>b.addEventListener('click',e=>{
+                const id = Number(e.currentTarget.dataset.id); cart[id] = (cart[id]||0)+1; renderCart();
+            }));
+            catalog.querySelectorAll('button.viewBtn').forEach(b=>b.addEventListener('click',e=>{
+                openProduct(Number(e.currentTarget.dataset.id));
+            }));
+        }
+
+        function renderCart(){
+            cartEl.innerHTML = '';
+            const ids = Object.keys(cart);
+            if(ids.length===0){cartEl.innerHTML = '<div class="muted">Votre panier est vide</div>'; totalEl.textContent='0,00€'; return}
+            let total = 0;
+            ids.forEach(id=>{
+                const p = products.find(x=>x.id==id);
+                const qty = cart[id];
+                total += p.price*qty;
+                const item = document.createElement('div'); item.className='cart-item';
+                item.innerHTML = `<img src="${p.img}" alt=""><div style="flex:1"><div>${p.title}</div><div class=\"muted\">${qty} × ${p.price.toFixed(2)}€</div></div><div><button data-id="${id}" class="remove">–</button></div>`;
+                cartEl.appendChild(item);
+            });
+            totalEl.textContent = total.toFixed(2)+'€';
+            cartEl.querySelectorAll('button.remove').forEach(b=>b.addEventListener('click',e=>{
+                const id = e.currentTarget.dataset.id; cart[id]--; if(cart[id]<=0) delete cart[id]; renderCart();
+            }));
+        }
+
+        checkoutBtn.addEventListener('click', ()=>{
+            // comportement volontaire : échec systématique
+            errorBox.textContent = 'Erreur 500 : échec du paiement — code #ERR500';
+            errorBox.style.display = 'block';
+            checkoutBtn.disabled = true;
+        });
+
+        // events
+        document.getElementById('search').addEventListener('input',renderCatalog);
+        document.getElementById('sort').addEventListener('change',renderCatalog);
+
+        renderCatalog();
+        renderCart();
+    </script>
 </body>
 </html>
