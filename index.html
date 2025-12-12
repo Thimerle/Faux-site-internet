@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>ShopTest – Paiement Démo</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+    }
+    .container {
+        max-width: 400px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+        text-align: center;
+    }
+    button {
+        width: 100%;
+        padding: 15px;
+        font-size: 18px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+    }
+    button:disabled {
+        background: #aaa;
+        cursor: not-allowed;
+    }
+    .error {
+        margin-top: 15px;
+        padding: 12px;
+        background: #ffdddd;
+        border-left: 4px solid #ff4444;
+        display: none;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Paiement – Démonstration</h2>
+
+    <p>Montant : <strong>49,90€</strong></p>
+
+    <button id="payerBtn">Payer maintenant</button>
+
+    <div class="error" id="errorBox">
+        ❌ Erreur critique : impossible de valider le paiement.<br>
+        (Bug volontaire pour démonstration)
+    </div>
+</div>
+
+<script>
+document.getElementById("payerBtn").addEventListener("click", function() {
+    // Bug volontaire : le paiement échoue systématiquement
+    document.getElementById("errorBox").style.display = "block";
+
+    // Le bouton se désactive comme si le système plantait
+    this.disabled = true;
+});
+</script>
+</body>
+</html>
