@@ -1,0 +1,15 @@
+{
+  "users": [],
+  "products": [
+    {"id":1,"title":"Chaussures confort","price":29.90,"img":"https://picsum.photos/seed/p1/400/300","desc":"Semelle amortissante, parfaites pour la marche."},
+    {"id":2,"title":"Veste légère","price":49.90,"img":"https://picsum.photos/seed/p2/400/300","desc":"Coupe moderne, résistante à l'eau légère."},
+    {"id":3,"title":"Sac à dos urbain","price":19.90,"img":"https://picsum.photos/seed/p3/400/300","desc":"Compartiment PC 15'', plusieurs poches."},
+    {"id":4,"title":"Casquette cool","price":9.90,"img":"https://picsum.photos/seed/p4/400/300","desc":"Style streetwear, plusieurs couleurs."},
+    {"id":5,"title":"Montre sport","price":39.90,"img":"https://picsum.photos/seed/p5/400/300","desc":"Étanche, suivi d'activité intégré."},
+    {"id":6,"title":"Écouteurs sans fil","price":24.90,"img":"https://picsum.photos/seed/p6/400/300","desc":"Réduction active du bruit, autonomie 20h."},
+    {"id":7,"title":"Lampe LED","price":12.90,"img":"https://picsum.photos/seed/p7/400/300","desc":"Éclairage chaud, intensité réglable."},
+    {"id":8,"title":"Tapis de yoga","price":14.90,"img":"https://picsum.photos/seed/p8/400/300","desc":"Antidérapant et confortable."},
+    {"id":9,"title":"Chargeur rapide","price":11.90,"img":"https://picsum.photos/seed/p9/400/300","desc":"USB-C 65W, compact."},
+    {"id":10,"title":"Lunettes soleil","price":17.90,"img":"https://picsum.photos/seed/p10/400/300","desc":"Protection UV400, monture légère."}
+  ]
+}
