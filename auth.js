@@ -1,39 +1,44 @@
-// Simple client-side auth simulation using localStorage
-// WARNING: pour démo uniquement — ne pas utiliser en production
+// Auth client-side wrapper that uses the backend API (JWT)
+// Stores token and user in localStorage under keys `fs_token` and `fs_user`.
 
-function _loadUsers(){
-  try{return JSON.parse(localStorage.getItem('fs_users')||'[]')}catch(e){return[]}
-}
-function _saveUsers(u){localStorage.setItem('fs_users',JSON.stringify(u))}
-
-function registerUser(username,email,password){
-  const users=_loadUsers();
-  if(!username||!email||!password) return {ok:false,msg:'Tous les champs sont requis.'};
-  if(password.length<6) return {ok:false,msg:'Le mot de passe doit faire au moins 6 caractères.'};
-  if(users.find(u=>u.email===email)) return {ok:false,msg:'Email déjà utilisé.'};
-  users.push({username, email, password});
-  _saveUsers(users);
-  localStorage.setItem('fs_session', JSON.stringify({username,email}));
-  return {ok:true};
-}
-
-function loginUser(email,password){
-  const users=_loadUsers();
-  const u = users.find(x=>x.email===email && x.password===password);
-  if(!u) return {ok:false,msg:'Identifiants invalides.'};
-  localStorage.setItem('fs_session', JSON.stringify({username:u.username,email:u.email}));
-  return {ok:true};
+function _saveSession(token, user){
+  if(token) localStorage.setItem('fs_token', token);
+  if(user) localStorage.setItem('fs_user', JSON.stringify(user));
 }
 
 function logout(){
-  localStorage.removeItem('fs_session');
+  localStorage.removeItem('fs_token');
+  localStorage.removeItem('fs_user');
 }
 
 function currentUser(){
-  try{return JSON.parse(localStorage.getItem('fs_session')||'null')}catch(e){return null}
+  try{ return JSON.parse(localStorage.getItem('fs_user')||'null'); }catch(e){ return null }
 }
 
-// helper to show login status in pages
+async function registerUser(username,email,password){
+  if(!username||!email||!password) return {ok:false,msg:'Tous les champs sont requis.'};
+  const res = await fetch('/api/register',{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,email,password})
+  });
+  const j = await res.json();
+  if(!res.ok) return {ok:false,msg: j.error || j.message || 'Erreur'};
+  _saveSession(j.token, j.user);
+  injectAuthLinks();
+  return {ok:true};
+}
+
+async function loginUser(email,password){
+  if(!email||!password) return {ok:false,msg:'Tous les champs sont requis.'};
+  const res = await fetch('/api/login',{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})
+  });
+  const j = await res.json();
+  if(!res.ok) return {ok:false,msg: j.error || j.message || 'Erreur'};
+  _saveSession(j.token, j.user);
+  injectAuthLinks();
+  return {ok:true};
+}
+
 function injectAuthLinks(){
   const usr = currentUser();
   const container = document.getElementById('authLinks');

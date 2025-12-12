@@ -21,11 +21,12 @@
   <script>
     const form = document.getElementById('loginForm');
     const msg = document.getElementById('msg');
-    form.addEventListener('submit', e=>{
+    form.addEventListener('submit', async e=>{
       e.preventDefault();
+      msg.textContent = '';
       const email = document.getElementById('email').value.trim();
       const pw = document.getElementById('password').value;
-      const r = loginUser(email,pw);
+      const r = await loginUser(email,pw);
       if(!r.ok){msg.textContent = r.msg; return}
       window.location.href = 'profile.html';
     });
