@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Inscription</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;padding:24px;background:#f7f7fb} .card{max-width:520px;margin:40px auto;padding:18px;border-radius:10px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.06)} input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8px} button{width:100%;padding:10px;border-radius:8px;border:none;background:#0070f3;color:#fff} .muted{color:#666;font-size:13px} a{color:#0070f3}</style>
+</head>
+<body>
+  <div class="card">
+    <h2>Créer un compte</h2>
+    <div id="msg" class="muted"></div>
+    <form id="regForm">
+      <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Mot de passe (≥ 6 char)" required>
+      <button type="submit">S'inscrire</button>
+    </form>
+    <p class="muted">Déjà inscrit ? <a href="login.html">Se connecter</a></p>
+  </div>
+  <script src="auth.js"></script>
+  <script>
+    const form = document.getElementById('regForm');
+    const msg = document.getElementById('msg');
+    form.addEventListener('submit', e=>{
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const pw = document.getElementById('password').value;
+      const r = registerUser(username,email,pw);
+      if(!r.ok){msg.textContent = r.msg; return}
+      window.location.href = 'profile.html';
+    });
+  </script>
+</body>
+</html>
