@@ -6,6 +6,9 @@
     <title>Temu‑Demo — Panier</title>
     <style>
         :root{--accent:#ff3b30;--muted:#888}
+        .promo-banner{background:linear-gradient(90deg,#ff8a65,#ff3b30);color:#fff;padding:10px;border-radius:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+        .badge{background:#ff3b30;color:#fff;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:700}
+        .countdown{font-weight:700}
         body{font-family:Inter,Arial,Helvetica,sans-serif;background:#f7f7fb;margin:0;padding:24px}
         .app{max-width:980px;margin:0 auto;display:flex;gap:24px}
         .catalog{flex:2;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
@@ -44,6 +47,11 @@
         </div>
     </header>
 
+    <div class="promo-banner" id="promoBanner">
+        <div><span class="badge">Flash</span>&nbsp;Offres limitées — jusqu'à -30% sur une sélection</div>
+        <div>Termine dans <span class="countdown" id="promoCountdown">--:--:--</span></div>
+    </div>
+
     <main class="app">
         <section style="flex:2">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -65,10 +73,16 @@
                     <div style="flex:1">
                         <div class="muted">Total</div>
                         <div id="total" style="font-weight:700">0,00€</div>
+                        <div id="discountLine" class="muted" style="font-size:13px;margin-top:6px;display:none">Remise appliquée : -0%</div>
                     </div>
                     <div style="width:140px">
                         <button id="checkoutBtn">Payer</button>
                     </div>
+                </div>
+
+                <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+                    <input id="promoCode" placeholder="Code promo" style="flex:1;padding:8px;border-radius:8px;border:1px solid #ddd">
+                    <button id="applyPromo" style="background:#333">Appliquer</button>
                 </div>
 
                 <div id="errorBox" class="error"></div>
@@ -112,6 +126,40 @@
 
         const cart = {};
 
+        // promotions / codes
+        const saleIds = [2,5,6,15]; // produits en promotion
+        const salePercent = 0.30; // 30% off
+        const promoCodes = {"PROMO10":0.10, "DEAL20":0.20};
+        let appliedPromo = null;
+        const promoEnd = Date.now() + 6*60*60*1000; // promo 6 heures
+
+        function formatTimeLeft(ms){
+            if(ms<=0) return '00:00:00';
+            const s = Math.floor(ms/1000);
+            const h = String(Math.floor(s/3600)).padStart(2,'0');
+            const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+            const sec = String(s%60).padStart(2,'0');
+            return `${h}:${m}:${sec}`;
+        }
+
+        function startPromoCountdown(){
+            const el = document.getElementById('promoCountdown');
+            const banner = document.getElementById('promoBanner');
+            const t = setInterval(()=>{
+                const left = promoEnd - Date.now();
+                if(left<=0){ el.textContent='00:00:00'; banner.style.display='none'; clearInterval(t); renderCatalog(); return }
+                el.textContent = formatTimeLeft(left);
+            },1000);
+        }
+
+        function applyPromo(code){
+            if(!code) return {ok:false,msg:'Entrez un code.'};
+            const up = (code||'').trim().toUpperCase();
+            if(!promoCodes[up]) return {ok:false,msg:'Code invalide.'};
+            appliedPromo = {code:up, pct: promoCodes[up]};
+            return {ok:true,msg:`Remise ${Math.round(promoCodes[up]*100)}% appliquée`};
+        }
+
         function openProduct(id){
             const p = products.find(x=>x.id==id);
             const modal = document.createElement('div');
@@ -136,11 +184,13 @@
 
             document.getElementById('count').textContent = visible.length+' produits';
             visible.forEach(p=>{
+                const onSale = saleIds.includes(p.id) && (Date.now() < promoEnd);
                 const card = document.createElement('div'); card.className='card';
                 card.innerHTML = `
+                    ${onSale?'<div style="position:absolute;margin:8px;z-index:2"><span class="badge">-${Math.round(salePercent*100)}%</span></div>':''}
                     <img src="${p.img}" alt="${p.title}">
                     <h3>${p.title}</h3>
-                    <div class="price">${p.price.toFixed(2)}€</div>
+                    <div class="price">${onSale?`<span style="text-decoration:line-through;color:#999;margin-right:6px">${p.price.toFixed(2)}€</span><span>${(p.price*(1-salePercent)).toFixed(2)}€</span>`:`${p.price.toFixed(2)}€`}</div>
                     <div class="muted">Livraison gratuite</div>
                     <div style="margin-top:8px;display:flex;gap:8px"><button data-id="${p.id}" class='addBtn'>Ajouter</button><button data-id="${p.id}" class='viewBtn' style='background:#fff;color:#111;border:1px solid #ddd'>Voir</button></div>`;
                 catalog.appendChild(card);
@@ -161,12 +211,24 @@
             ids.forEach(id=>{
                 const p = products.find(x=>x.id==id);
                 const qty = cart[id];
-                total += p.price*qty;
+                const onSale = saleIds.includes(p.id) && (Date.now() < promoEnd);
+                const unitPrice = onSale ? (p.price*(1-salePercent)) : p.price;
+                total += unitPrice*qty;
                 const item = document.createElement('div'); item.className='cart-item';
                 item.innerHTML = `<img src="${p.img}" alt=""><div style="flex:1"><div>${p.title}</div><div class=\"muted\">${qty} × ${p.price.toFixed(2)}€</div></div><div><button data-id="${id}" class="remove">–</button></div>`;
                 cartEl.appendChild(item);
             });
-            totalEl.textContent = total.toFixed(2)+'€';
+            // apply promo code
+            let finalTotal = total;
+            if(appliedPromo){
+                const discount = finalTotal * appliedPromo.pct;
+                finalTotal = finalTotal - discount;
+                document.getElementById('discountLine').style.display = 'block';
+                document.getElementById('discountLine').textContent = `Remise appliquée (${appliedPromo.code}) : -${Math.round(appliedPromo.pct*100)}% (${discount.toFixed(2)}€)`;
+            } else {
+                document.getElementById('discountLine').style.display = 'none';
+            }
+            totalEl.textContent = finalTotal.toFixed(2)+'€';
             cartEl.querySelectorAll('button.remove').forEach(b=>b.addEventListener('click',e=>{
                 const id = e.currentTarget.dataset.id; cart[id]--; if(cart[id]<=0) delete cart[id]; renderCart();
             }));
@@ -183,6 +245,17 @@
         document.getElementById('search').addEventListener('input',renderCatalog);
         document.getElementById('sort').addEventListener('change',renderCatalog);
 
+        // promo apply handler
+        document.getElementById('applyPromo').addEventListener('click', ()=>{
+            const code = document.getElementById('promoCode').value || '';
+            const res = applyPromo(code);
+            if(!res.ok){ alert(res.msg); return }
+            alert(res.msg);
+            renderCart();
+        });
+
+        // start promo countdown and initial render
+        startPromoCountdown();
         renderCatalog();
         renderCart();
     </script>
