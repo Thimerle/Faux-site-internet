@@ -90,7 +90,9 @@
         </aside>
     </main>
 
-    <script>
+    <script type="module">
+        import { API_BASE_URL } from './config.js';
+
         let products = [];
         const catalog = document.getElementById('catalog');
         const cartEl = document.getElementById('cart');
@@ -98,7 +100,9 @@
         const checkoutBtn = document.getElementById('checkoutBtn');
         const errorBox = document.getElementById('errorBox');
 
-        const cart = {};
+        function loadCart(){ try{ return JSON.parse(localStorage.getItem('fs_cart')||'{}'); }catch(e){ return {} }}
+        function saveCart(){ try{ localStorage.setItem('fs_cart', JSON.stringify(cart)); }catch(e){} }
+        const cart = loadCart();
 
         // promotions / codes
         const saleIds = [2,5,6,15]; // produits en promotion
@@ -141,7 +145,7 @@
             modal.innerHTML = `<div style="width:680px;background:#fff;border-radius:12px;padding:16px"><div style='display:flex;gap:12px'><img src="${p.img}" style='width:260px;height:180px;object-fit:cover;border-radius:8px'><div style='flex:1'><h2 style='margin:0'>${p.title}</h2><div class='muted'>${p.desc}</div><div style='margin-top:12px;font-weight:700'>${p.price.toFixed(2)}€</div><div style='margin-top:12px;display:flex;gap:8px'><button id='modalAdd'>Ajouter au panier</button><button id='modalClose' style='background:#ddd;color:#111'>Fermer</button></div></div></div></div>`;
             document.body.appendChild(modal);
             modal.querySelector('#modalClose').addEventListener('click',()=>modal.remove());
-            modal.querySelector('#modalAdd').addEventListener('click',()=>{cart[id]=(cart[id]||0)+1;renderCart();modal.remove()});
+            modal.querySelector('#modalAdd').addEventListener('click',()=>{cart[id]=(cart[id]||0)+1; saveCart(); renderCart(); modal.remove()});
         }
 
         function renderCatalog(){
@@ -170,7 +174,7 @@
                 catalog.appendChild(card);
             });
             catalog.querySelectorAll('button.addBtn').forEach(b=>b.addEventListener('click',e=>{
-                const id = Number(e.currentTarget.dataset.id); cart[id] = (cart[id]||0)+1; renderCart();
+                const id = Number(e.currentTarget.dataset.id); cart[id] = (cart[id]||0)+1; saveCart(); renderCart();
             }));
             catalog.querySelectorAll('button.viewBtn').forEach(b=>b.addEventListener('click',e=>{
                 openProduct(Number(e.currentTarget.dataset.id));
@@ -204,7 +208,7 @@
             }
             totalEl.textContent = finalTotal.toFixed(2)+'€';
             cartEl.querySelectorAll('button.remove').forEach(b=>b.addEventListener('click',e=>{
-                const id = e.currentTarget.dataset.id; cart[id]--; if(cart[id]<=0) delete cart[id]; renderCart();
+                const id = e.currentTarget.dataset.id; cart[id]--; if(cart[id]<=0) delete cart[id]; saveCart(); renderCart();
             }));
         }
 
@@ -231,7 +235,7 @@
         // fetch products from API then render
         (async ()=>{
             try{
-                const r = await fetch('/api/products');
+                const r = await fetch(`${API_BASE_URL}/api/products`);
                 if(r.ok) products = await r.json();
             }catch(e){ console.warn('Impossible de charger produits depuis API, fallback au client-side.'); }
             startPromoCountdown();

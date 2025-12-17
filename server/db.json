@@ -10,6 +10,17 @@
     {"id":7,"title":"Lampe LED","price":12.90,"img":"https://picsum.photos/seed/p7/400/300","desc":"Éclairage chaud, intensité réglable."},
     {"id":8,"title":"Tapis de yoga","price":14.90,"img":"https://picsum.photos/seed/p8/400/300","desc":"Antidérapant et confortable."},
     {"id":9,"title":"Chargeur rapide","price":11.90,"img":"https://picsum.photos/seed/p9/400/300","desc":"USB-C 65W, compact."},
-    {"id":10,"title":"Lunettes soleil","price":17.90,"img":"https://picsum.photos/seed/p10/400/300","desc":"Protection UV400, monture légère."}
+    {"id":10,"title":"Lunettes soleil","price":17.90,"img":"https://picsum.photos/seed/p10/400/300","desc":"Protection UV400, monture légère."},
+    {"id":11,"title":"Pince à cheveux chic","price":4.90,"img":"https://picsum.photos/seed/p11/400/300","desc":"Lot de 6 pinces tendance, parfait pour coiffure rapide."},
+    {"id":12,"title":"Organisateur de câbles","price":3.90,"img":"https://picsum.photos/seed/p12/400/300","desc":"Autocollant, garde vos câbles bien rangés."},
+    {"id":13,"title":"Brosse nettoyante","price":5.50,"img":"https://picsum.photos/seed/p13/400/300","desc":"Pour visage et corps, douce et efficace."},
+    {"id":14,"title":"Housse smartphone silicone","price":6.90,"img":"https://picsum.photos/seed/p14/400/300","desc":"Protection anti-choc, textures variées."},
+    {"id":15,"title":"Support téléphone voiture","price":7.90,"img":"https://picsum.photos/seed/p15/400/300","desc":"Fixation magnétique, rotation 360°."},
+    {"id":16,"title":"Lampe ring LED mini","price":8.90,"img":"https://picsum.photos/seed/p16/400/300","desc":"Clip pour selfies, intensité réglable."},
+    {"id":17,"title":"Masque sommeil relax","price":4.50,"img":"https://picsum.photos/seed/p17/400/300","desc":"Confortable, bloque la lumière."},
+    {"id":18,"title":"Mini aspirateur USB","price":12.90,"img":"https://picsum.photos/seed/p18/400/300","desc":"Pour clavier, voiture, pratique et compact."},
+    {"id":19,"title":"Porte-clés LED","price":3.50,"img":"https://picsum.photos/seed/p19/400/300","desc":"Porte-clés lumineux, batterie incluse."},
+    {"id":20,"title":"Coussin voyage gonflable","price":9.90,"img":"https://picsum.photos/seed/p20/400/300","desc":"Compact, support confortable pour la nuque."}
   ]
 }
+

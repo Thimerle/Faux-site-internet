@@ -1,6 +1,8 @@
 // Auth client-side wrapper that uses the backend API (JWT)
 // Stores token and user in localStorage under keys `fs_token` and `fs_user`.
 
+import { API_BASE_URL } from './config.js';
+
 function _saveSession(token, user){
   if(token) localStorage.setItem('fs_token', token);
   if(user) localStorage.setItem('fs_user', JSON.stringify(user));
@@ -17,7 +19,7 @@ function currentUser(){
 
 async function registerUser(username,email,password){
   if(!username||!email||!password) return {ok:false,msg:'Tous les champs sont requis.'};
-  const res = await fetch('/api/register',{
+  const res = await fetch(`${API_BASE_URL}/api/register`,{
     method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,email,password})
   });
   const j = await res.json();
@@ -29,7 +31,7 @@ async function registerUser(username,email,password){
 
 async function loginUser(email,password){
   if(!email||!password) return {ok:false,msg:'Tous les champs sont requis.'};
-  const res = await fetch('/api/login',{
+  const res = await fetch(`${API_BASE_URL}/api/login`,{
     method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})
   });
   const j = await res.json();
@@ -47,6 +49,8 @@ function injectAuthLinks(){
   const btn = document.getElementById('logoutBtn');
   if(btn) btn.addEventListener('click',e=>{e.preventDefault(); logout(); injectAuthLinks(); window.location.href='index.html';});
 }
+
+export { registerUser, loginUser, logout, currentUser, injectAuthLinks };
 
 document.addEventListener('DOMContentLoaded', ()=>{
   injectAuthLinks();

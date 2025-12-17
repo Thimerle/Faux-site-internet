@@ -24,6 +24,21 @@ app.use('/', express.static(path.join(__dirname, '..')));
 // API: products
 app.get('/api/products', (req,res)=>{
   const db = readDB();
+  // if auth provided, try to return a personalized ordering
+  const auth = req.headers.authorization || '';
+  if(auth.startsWith('Bearer ')){
+    const token = auth.slice(7);
+    try{
+      const payload = jwt.verify(token, JWT_SECRET);
+      const user = db.users.find(u=>u.id==payload.id);
+      if(user && typeof user.recoSeed !== 'undefined'){
+        // seeded shuffle so same user sees same ordering across devices
+        const seed = user.recoSeed;
+        const shuffled = seededShuffle(db.products, seed);
+        return res.json(shuffled);
+      }
+    }catch(e){ /* invalid token -> fallback to public list */ }
+  }
   res.json(db.products);
 });
 
@@ -34,7 +49,9 @@ app.post('/api/register', async (req,res)=>{
   const db = readDB();
   if(db.users.find(u=>u.email===email)) return res.status(400).json({error:'Email déjà utilisé.'});
   const hash = await bcrypt.hash(password, 10);
-  const user = {id: Date.now(), username, email, password: hash};
+  // assign a deterministic recommendation seed so products can be personalized
+  const recoSeed = Math.floor(Math.random()*1000000);
+  const user = {id: Date.now(), username, email, password: hash, recoSeed, savedProducts: []};
   db.users.push(user);
   writeDB(db);
   const token = jwt.sign({id:user.id,email:user.email,username:user.username}, JWT_SECRET, {expiresIn:'7d'});
@@ -67,3 +84,23 @@ app.get('/api/me', (req,res)=>{
 
 const port = process.env.PORT || 3000;
 app.listen(port, ()=> console.log(`Server running on http://localhost:${port}`));
+
+// Deterministic shuffle (mulberry32 PRNG)
+function mulberry32(a){
+  return function(){
+    var t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+
+function seededShuffle(arr, seed){
+  const r = mulberry32(seed);
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(r()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}

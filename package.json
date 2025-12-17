@@ -1,0 +1,12 @@
+{
+  "name": "faux-site-frontend",
+  "version": "1.0.0",
+  "description": "Static front for Faux-site-internet — ready to publish to gh-pages",
+  "homepage": "https://Thimerle.github.io/Faux-site-internet",
+  "scripts": {
+    "deploy": "gh-pages -d ."
+  },
+  "devDependencies": {
+    "gh-pages": "^5.0.0"
+  }
+}

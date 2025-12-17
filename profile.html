@@ -12,8 +12,10 @@
     <div id="info">Chargement...</div>
     <div style="margin-top:12px"><button id="logout">Se déconnecter</button> <a href="index.html" style="margin-left:12px">Retour boutique</a></div>
   </div>
-  <script src="auth.js"></script>
-  <script>
+  <script type="module">
+    import { API_BASE_URL } from './config.js';
+    import { currentUser, logout } from './auth.js';
+
     const info = document.getElementById('info');
     const user = currentUser();
     const token = localStorage.getItem('fs_token');
@@ -22,7 +24,7 @@
       // try to validate token with /api/me
       (async ()=>{
         try{
-          const r = await fetch('/api/me',{headers:{'Authorization': token?`Bearer ${token}`:''}});
+          const r = await fetch(`${API_BASE_URL}/api/me`,{headers:{'Authorization': token?`Bearer ${token}`:''}});
           if(r.ok){ const j = await r.json(); info.innerHTML = `<div><strong>Utilisateur :</strong> ${j.user.username}</div><div class=\"muted\"><strong>Email :</strong> ${j.user.email}</div>`; }
           else if(user){ info.innerHTML = `<div><strong>Utilisateur :</strong> ${user.username}</div><div class=\"muted\"><strong>Email :</strong> ${user.email}</div>`; }
           else { window.location.href='login.html'; }

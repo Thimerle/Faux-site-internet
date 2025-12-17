@@ -18,8 +18,9 @@
     </form>
     <p class="muted">Déjà inscrit ? <a href="login.html">Se connecter</a></p>
   </div>
-  <script src="auth.js"></script>
-  <script>
+  <script type="module">
+    import { registerUser } from './auth.js';
+
     const form = document.getElementById('regForm');
     const msg = document.getElementById('msg');
     form.addEventListener('submit', async e=>{
