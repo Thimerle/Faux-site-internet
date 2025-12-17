@@ -66,5 +66,9 @@ npm run deploy
 
 L'URL de publication est configurée dans `package.json` racine (`homepage`). Mettez-la à jour si votre dépôt ou votre compte change.
 
+---
+
+Site déployé automatiquement via GitHub Actions.
+
 
 
